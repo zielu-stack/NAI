@@ -1,17 +1,38 @@
-import math
+import matplotlib.pyplot as plt
+import numpy as np
 
 def create_dataset(filename):
     with open(filename, "r") as file:
         raw_dataset = [line.strip().split() for line in file.readlines()]
         parsed_dataset = []
+        row_length = len(raw_dataset[0]) - 1
         for raw_row in raw_dataset:
             parsed_row = []
-            for i in range(0, len(raw_row)-1):
+            for i in range(0, row_length):
                 number = raw_row[i].replace(",", ".")
                 parsed_row.append(float(number))
-            parsed_row.append(raw_row[len(raw_row)-1])
+            parsed_row.append(raw_row[row_length])
             parsed_dataset.append(parsed_row)
         return parsed_dataset
+
+def get_range(dataset):
+    row_length = len(dataset[0]) - 1
+    mins = [float('inf')] * row_length
+    maxs = [float('inf') * -1] * row_length
+    for row in dataset:
+        for i in range(row_length):
+            if row[i] < mins[i]:
+                mins[i] = row[i]
+            if row[i] > maxs[i]:
+                maxs[i] = row[i]
+    return [mins, maxs]
+
+def normalize_dataset(dataset, mins, maxs):
+    row_length = len(dataset[0]) - 1
+    for row in dataset:
+        for i in range(row_length):
+            row[i] = (row[i] - mins[i]) / (maxs[i] - mins[i])
+    return dataset
 
 def knn(training_data, test_observation, k):
     best_k_deltas = [float("inf")] * k
@@ -44,7 +65,14 @@ def knn(training_data, test_observation, k):
 training_dataset = create_dataset("iris_training.txt")
 test_dataset = create_dataset("iris_test.txt")
 
-for k in range(1, 14):
+mins, maxs = get_range(training_dataset)
+
+training_dataset = normalize_dataset(training_dataset, mins, maxs)
+test_dataset = normalize_dataset(test_dataset, mins, maxs)
+
+k_list = []
+acc_list = []
+for k in range(1, 60):
     correct_counter = 0
     for observation in test_dataset:
         knn_outcome = knn(training_dataset, observation, k)
@@ -52,4 +80,12 @@ for k in range(1, 14):
             correct_counter += 1
         else:
             print(f"KNN: {knn_outcome}, poprawna odpowiedź: {observation[-1]}")
-    print(f"Dokładność: {correct_counter/len(test_dataset)*100}%, {k}")
+    accuracy = correct_counter / len(test_dataset) * 100
+    print(f"Dokładność: {accuracy}%, dla k = {k}")
+    k_list.append(k)
+    acc_list.append(accuracy)
+
+xs = np.array(k_list)
+ys = np.array(acc_list)
+plt.plot(xs, ys)
+plt.show()
