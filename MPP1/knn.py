@@ -62,6 +62,7 @@ def knn(training_data, test_observation, k):
             min_avg_delta = avg_delta
     return best_result
 
+
 training_dataset = create_dataset("iris_training.txt")
 test_dataset = create_dataset("iris_test.txt")
 
@@ -70,33 +71,54 @@ mins, maxs = get_range(training_dataset)
 training_dataset = normalize_dataset(training_dataset, mins, maxs)
 test_dataset = normalize_dataset(test_dataset, mins, maxs)
 
-mode = input("Wybierz sposób uruchomienia programu:\n"
-             "1 - knn dla zbioru z plików iris_test.txt i iris_train.txt\n"
-             "2 - knn dla ręcznie podanych danych na bazie pliku iris_train.txt\n")
-if mode == "1":
-    k_list = []
-    acc_list = []
-    for k in range(1, 60):
+while True:
+    mode = input("Wybierz działanie:\n"
+                 "0 - Zakończ działanie programu:\n"
+                 "1 - knn dla ręcznie podanych danych na bazie pliku iris_train.txt\n"
+                 "2 - knn dla zbioru z plików i wybranego k\n"
+                 "3 - knn dla zbioru z plików i różnych k (wykres)\n")
+
+    if mode == "0":
+        break
+
+    elif mode == "1":
+        vector = list(map(float, input("Podaj wektor obserwacji (wartości oddzielone spacjami): ").split()))
+        if len(vector) != len(training_dataset[0]):
+            vector.append("")
+        vector = normalize_dataset([vector], mins, maxs)[0]
+        k = int(input("Podaj k: "))
+        print(f"Wynik: {knn(training_dataset, vector, k)}")
+
+    elif mode == "2":
+        k = int(input("Podaj k: "))
         correct_counter = 0
         for observation in test_dataset:
             knn_outcome = knn(training_dataset, observation, k)
             if knn_outcome == observation[-1]:
-                correct_counter += 1
-            else:
-                print(f"KNN: {knn_outcome}, poprawna odpowiedź: {observation[-1]}")
+                correct_counter+=1
+            # else:
+            #     print(f"KNN: {knn_outcome}, poprawna odpowiedź: {observation[-1]}", observation)
         accuracy = correct_counter / len(test_dataset) * 100
         print(f"Dokładność: {accuracy}%, dla k = {k}")
-        k_list.append(k)
-        acc_list.append(accuracy)
-    xs = np.array(k_list)
-    ys = np.array(acc_list)
-    plt.plot(xs, ys, "o-", linewidth=2)
-    plt.show()
 
-elif mode == "2":
-    vector = list(map(float, input("Podaj wektor obserwacji (wartości oddzielone spacjami): ").split()))
-    if len(vector) != len(training_dataset[0]):
-        vector.append("")
-    vector = normalize_dataset([vector], mins, maxs)
-    k = int(input("Podaj k: "))
-    print(f"Wynik: {knn(training_dataset, vector[0], k)}")
+    elif mode == "3":
+        k_list = []
+        acc_list = []
+        for k in range(1, len(training_dataset)//2):
+            correct_counter = 0
+            for observation in test_dataset:
+                knn_outcome = knn(training_dataset, observation, k)
+                if knn_outcome == observation[-1]:
+                    correct_counter += 1
+                # else:
+                #     print(f"KNN: {knn_outcome}, poprawna odpowiedź: {observation[-1]}", observation)
+            accuracy = correct_counter / len(test_dataset) * 100
+            # print(f"Dokładność: {accuracy}%, dla k = {k}")
+            k_list.append(k)
+            acc_list.append(accuracy)
+        xs = np.array(k_list)
+        ys = np.array(acc_list)
+        plt.plot(xs, ys, marker='o', ms="3")
+        plt.xlabel("Wartości k")
+        plt.ylabel("Dokładność w %")
+        plt.show()
