@@ -63,8 +63,8 @@ def knn(training_data, test_observation, k):
     return best_result
 
 
-training_dataset = create_dataset("iris_training.txt")
-test_dataset = create_dataset("iris_test.txt")
+training_dataset = create_dataset("..\\iris-data\\iris_training.txt")
+test_dataset = create_dataset("..\\iris-data\\iris_test.txt")
 
 mins, maxs = get_range(training_dataset)
 
