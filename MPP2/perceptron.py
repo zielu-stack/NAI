@@ -1,13 +1,23 @@
-from random import random
+from random import uniform
 
 class Perceptron:
-    def __init__(self, n, ):
-        self.weights = [rand for _ in range(n)]
-        self.threshold = 0
-        return
+    def __init__(self, n, threshold=0.5, alpha=0.01):
+        self.weights = [uniform(-1,1) for _ in range(n)]
+        self.threshold = threshold
+        self.alpha = alpha
 
-    def learn(self, dataset, epoch, ):
-        return
+    def compute_outcome(self, observation):
+        net = sum(w * x for w,x in zip(self.weights,observation))
+        if net >= self.threshold:
+            return 1
+        return 0
+
+    def learn(self, observation, expected_outcome):
+        outcome = self.compute_outcome(observation)
+        diff = expected_outcome - outcome
+        for i in range(len(self.weights)):
+            self.weights[i] += self.alpha * diff * observation[i]
+        self.threshold += self.alpha * diff * -1
 
 def create_dataset(filename):
     with open(filename, "r") as file:
@@ -23,6 +33,18 @@ def create_dataset(filename):
             parsed_dataset.append(parsed_row)
         return parsed_dataset
 
+training_dataset = create_dataset("..\\iris-data\\iris_training.txt")
+test_dataset = create_dataset("..\\iris-data\\iris_test.txt")
 
-training_dataset = create_dataset("iris_training.txt")
-test_dataset = create_dataset("iris_test.txt")
+perceptron = Perceptron(n=4)
+
+epoch = int(input("How many epochs? "))
+
+for _ in range(epoch):
+    for training_observation in training_dataset:
+        perceptron.learn(training_observation[:-1], training_observation[-1])
+
+
+for test_observation in test_dataset:
+    outcome = perceptron.compute_outcome(test_observation[:-1])
+
