@@ -19,6 +19,9 @@ class Perceptron:
             self.weights[i] += self.alpha * diff * observation[i]
         self.threshold += self.alpha * diff * -1
 
+    def __str__(self):
+        return f"Perceptron: wagi: {self.weights}, prog: {self.threshold}, stala: {self.alpha}"
+
 
 def create_dataset(filename):
     with open(filename, "r") as file:
@@ -70,9 +73,17 @@ perceptron = Perceptron(n=len(training_dataset[0])-1)
 
 epochs = int(input("Ile epok? "))
 
-for _ in range(epochs):
+for i in range(epochs):
+    correct = 0
     for training_observation in training_dataset:
         perceptron.learn(training_observation[:-1], training_observation[-1])
+        if perceptron.compute_outcome(training_observation[:-1]) == training_observation[-1]:
+            correct += 1
+    print(f"Epoka {i}, poprawne: {correct/len(training_dataset)*100}%")
+    if correct == len(training_dataset):
+        break
+
+print(perceptron)
 
 while True:
     mode = int(input("Wybierz tryb:\n"
