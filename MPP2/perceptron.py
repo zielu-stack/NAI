@@ -1,13 +1,14 @@
 from random import uniform
 
+
 class Perceptron:
     def __init__(self, n, threshold=0, alpha=0.01):
-        self.weights = [uniform(-1,1) for _ in range(n)]
+        self.weights = [uniform(-1, 1) for _ in range(n)]
         self.threshold = threshold
         self.alpha = alpha
 
     def compute_outcome(self, observation):
-        net = sum(w * x for w,x in zip(self.weights,observation))
+        net = sum(w * x for w, x in zip(self.weights, observation))
         if net >= self.threshold:
             return 1
         return 0
@@ -18,6 +19,9 @@ class Perceptron:
         for i in range(len(self.weights)):
             self.weights[i] += self.alpha * diff * observation[i]
         self.threshold += self.alpha * diff * -1
+
+    def __str__(self):
+        return f"Perceptron: wagi: {self.weights}, prog: {self.threshold}, stala: {self.alpha}"
 
 
 def create_dataset(filename):
@@ -34,6 +38,7 @@ def create_dataset(filename):
             parsed_dataset.append(parsed_row)
         return parsed_dataset
 
+
 def get_range(dataset):
     row_length = len(dataset[0]) - 1
     mins = [float('inf')] * row_length
@@ -45,6 +50,7 @@ def get_range(dataset):
             if row[i] > maxs[i]:
                 maxs[i] = row[i]
     return [mins, maxs]
+
 
 def normalize_dataset(dataset, mins, maxs):
     row_length = len(dataset[0]) - 1
@@ -66,19 +72,27 @@ mins, maxs = get_range(training_dataset)
 training_dataset = normalize_dataset(training_dataset, mins, maxs)
 test_dataset = normalize_dataset(test_dataset, mins, maxs)
 
-perceptron = Perceptron(n=len(training_dataset[0])-1)
+perceptron = Perceptron(n=len(training_dataset[0]) - 1)
 
 epochs = int(input("Ile epok? "))
 
-for _ in range(epochs):
+for i in range(epochs):
+    correct = 0
     for training_observation in training_dataset:
         perceptron.learn(training_observation[:-1], training_observation[-1])
+        if perceptron.compute_outcome(training_observation[:-1]) == training_observation[-1]:
+            correct += 1
+    print(f"Epoka {i + 1}, poprawne: {correct / len(training_dataset) * 100}%")
+    if correct == len(training_dataset):
+        break
+
+print(perceptron)
 
 while True:
     mode = int(input("Wybierz tryb:\n"
-                 "0 - zakończ\n"
-                 "1 - perceptron dla zbioru testowego\n"
-                 "2 - perceptron dla recznie podanych danych\n"))
+                     "0 - zakończ\n"
+                     "1 - perceptron dla zbioru testowego\n"
+                     "2 - perceptron dla recznie podanych danych\n"))
     if mode == 0:
         break
     elif mode == 1:
@@ -88,7 +102,7 @@ while True:
             if outcome == test_observation[-1]:
                 correct += 1
         accuracy = correct / len(test_dataset)
-        print(f"Dokladnosc: {accuracy*100}%")
+        print(f"Dokladnosc: {accuracy * 100}%")
     elif mode == 2:
         vector = list(map(float, input("Podaj wektor obserwacji (wartości oddzielone spacjami): ").split()))
         outcome = perceptron.compute_outcome(normalize_dataset([vector], mins, maxs)[0])
