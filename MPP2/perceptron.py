@@ -58,8 +58,8 @@ def normalize_dataset(dataset, mins, maxs):
     return dataset
 
 
-training_dataset = create_dataset("..\\iris-data\\iris_training.txt")
-test_dataset = create_dataset("..\\iris-data\\iris_test.txt")
+training_dataset = create_dataset("..\\data\\iris-data\\iris_training.txt")
+test_dataset = create_dataset("..\\data\\iris-data\\iris_test.txt")
 
 mins, maxs = get_range(training_dataset)
 
